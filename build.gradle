@@ -2,8 +2,18 @@ plugins {
     id 'java'
 }
 
+
+jar {
+    manifest {
+        attributes "Main-Class": "com.scraper.Runner"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
 group 'com.scraper'
-version '1.0'
 
 repositories {
     mavenCentral()
