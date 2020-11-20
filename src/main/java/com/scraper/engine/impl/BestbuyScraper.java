@@ -1,6 +1,5 @@
 package com.scraper.engine.impl;
 
-import com.scraper.engine.Scraper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -10,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class BestbuyScraper implements Scraper {
+public class BestbuyScraper extends DefaultScraper {
 
     private static final String AUTO_NOTIFY = "AUTO NOTIFY";
     private static final String SOLD_OUT = "SOLD OUT";
@@ -20,35 +19,40 @@ public class BestbuyScraper implements Scraper {
     private static final String LINK_PREFIX = "https://www.bestbuy.com";
 
     @Override
-    public List<String> scrape(String uri, boolean inStock) throws IOException {
+    public List<String> scrape(String uri, boolean inStock) {
 
         if (!uri.contains("bestbuy")) {
             return Collections.emptyList();
         }
-
-        Document page = Jsoup.parse(new URL(uri), 8000);
-
         List ret = new ArrayList<String>();
 
-        page.select("div[class=right-column]").forEach(it -> {
-            String product = it.select("h4[class=sku-header] > a").text();
-            String link = LINK_PREFIX + it.select("h4[class=sku-header] > a").attr("href");
-            String stock = it.select("div[class=sku-list-item-button]").text().toUpperCase();
-            if (inStock) {
-                if (stock.contains(AUTO_NOTIFY) || stock.contains(SOLD_OUT) ||
-                        stock.contains(CHECK_STORES) || stock.contains(SHOP_OPEN_BOX) ||
-                        stock.contains(COMING_SOON)) {
+        try {
+            Document page = Jsoup.parse(new URL(uri), 8000);
 
-                    ret.add(product + "‽" + link);
+
+            page.select("div[class=right-column]").forEach(it -> {
+                String product = it.select("h4[class=sku-header] > a").text();
+                String link = LINK_PREFIX + it.select("h4[class=sku-header] > a").attr("href");
+                String stock = it.select("div[class=sku-list-item-button]").text().toUpperCase();
+                if (inStock) {
+                    if (stock.contains(AUTO_NOTIFY) || stock.contains(SOLD_OUT) ||
+                            stock.contains(CHECK_STORES) || stock.contains(SHOP_OPEN_BOX) ||
+                            stock.contains(COMING_SOON)) {
+
+                        ret.add(product + "‽" + link);
+                    }
+                } else {
+                    if (!stock.contains(AUTO_NOTIFY) && !stock.contains(SOLD_OUT) &&
+                            !stock.contains(CHECK_STORES) && !stock.contains(SHOP_OPEN_BOX) &&
+                            !stock.contains(COMING_SOON)) {
+                        ret.add(product + "‽" + link);
+                    }
                 }
-            } else {
-                if (!stock.contains(AUTO_NOTIFY) && !stock.contains(SOLD_OUT) &&
-                        !stock.contains(CHECK_STORES) && !stock.contains(SHOP_OPEN_BOX) &&
-                        !stock.contains(COMING_SOON)) {
-                    ret.add(product + "‽" + link);
-                }
-            }
-        });
+            });
+        } catch (IOException e) {
+            System.err.println("Error while Scraping!");
+            e.printStackTrace();
+        }
 
         return ret;
     }

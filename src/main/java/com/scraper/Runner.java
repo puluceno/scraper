@@ -2,13 +2,13 @@ package com.scraper;
 
 import com.scraper.engine.Scraper;
 import com.scraper.engine.impl.BestbuyScraper;
+import com.scraper.engine.impl.BhPhotoScraper;
 import com.scraper.engine.impl.DefaultScraper;
 import com.scraper.engine.impl.NeweggScraper;
 
 import javax.sound.sampled.*;
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -31,7 +31,7 @@ public class Runner {
         List<String> scrapeCpu;
         List<String> scrapePs5;
 
-        Scraper scraper = new DefaultScraper(new BestbuyScraper(), new NeweggScraper());
+        Scraper scraper = new DefaultScraper(new BestbuyScraper(), new NeweggScraper(), new BhPhotoScraper());
 
         try {
             fh = new FileHandler("poop.log");
@@ -42,33 +42,26 @@ public class Runner {
             View view = new View();
 
             while (true) {
+                logger.info("Scraping... ");
                 List<String> urls = view.getUrls();
                 if (view.inStock) {
-                    scrape3080 = scraper.scrape(urls.get(0), false);
-                    scrape3080.addAll(scraper.scrape(urls.get(4), false));
+                    scrape3080 = scraper.scrape(Arrays.asList(urls.get(0), urls.get(4)), false);
 
-                    scrape6800xt = scraper.scrape(urls.get(1), false);
-                    scrape6800xt.addAll(scraper.scrape(urls.get(5), false));
+                    scrape6800xt = scraper.scrape(Arrays.asList(urls.get(1), urls.get(5)), false);
 
-                    scrapeCpu = scraper.scrape(urls.get(2), false);
-                    scrapeCpu.addAll(scraper.scrape(urls.get(6), false));
+                    scrapeCpu = scraper.scrape(Arrays.asList(urls.get(2), urls.get(6), urls.get(10)), false);
 
-                    scrapePs5 = scraper.scrape(urls.get(3), false);
-                    scrapePs5.addAll(scraper.scrape(urls.get(7), false));
+                    scrapePs5 = scraper.scrape(Arrays.asList(urls.get(3), urls.get(7), urls.get(11)), false);
 
                     startAlert(view, scrape3080, scrape6800xt, scrapeCpu, scrapePs5);
                 } else {
-                    scrape3080 = scraper.scrape(urls.get(0), true);
-                    scrape3080.addAll(scraper.scrape(urls.get(4), true));
+                    scrape3080 = scraper.scrape(Arrays.asList(urls.get(0), urls.get(4)), true);
 
-                    scrape6800xt = scraper.scrape(urls.get(1), true);
-                    scrape6800xt.addAll(scraper.scrape(urls.get(5), true));
+                    scrape6800xt = scraper.scrape(Arrays.asList(urls.get(1), urls.get(5)), true);
 
-                    scrapeCpu = scraper.scrape(urls.get(2), true);
-                    scrapeCpu.addAll(scraper.scrape(urls.get(6), true));
+                    scrapeCpu = scraper.scrape(Arrays.asList(urls.get(2), urls.get(6), urls.get(10)), true);
 
-                    scrapePs5 = scraper.scrape(urls.get(3), true);
-                    scrapePs5.addAll(scraper.scrape(urls.get(7), true));
+                    scrapePs5 = scraper.scrape(Arrays.asList(urls.get(3), urls.get(7), urls.get(11)), true);
                 }
                 view.set3080Content(scrape3080);
                 view.set6800xtContent(scrape6800xt);
@@ -78,8 +71,6 @@ public class Runner {
             }
         } catch (Exception e) {
             logger.warning("Main Error detected: " + e.toString() + "\r\n         Stacktrace: " + Arrays.toString(e.getStackTrace()));
-        } finally {
-//            closer();
         }
     }
 

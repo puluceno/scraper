@@ -5,5 +5,7 @@ import java.util.List;
 
 public interface Scraper {
 
-    List<String> scrape(String uri, boolean inStock) throws IOException;
+    List<String> scrape(String uri, boolean inStock);
+
+    List<String> scrape(List<String> uris, boolean inStock);
 }
